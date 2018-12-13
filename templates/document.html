@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<title>Página principal de UPCoin</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<script type="text/javascript">
+
+  let usuaris = []
+
+  function actualitzaCoins() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', "http://localhost:5000/quantitat?name="+getCookie("username_upcoin"), true);
+    xhr.send();
+
+    xhr.addEventListener("readystatechange", function() {
+      if (xhr.readyState == 4) {
+        document.getElementById("mycoins").innerHTML = xhr.responseText;
+      }
+    }, false);
+  }
+
+  function actualitzaUsuaris() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', "http://localhost:5000/usuaris", true);
+    xhr.send();
+
+    xhr.addEventListener("readystatechange", function() {
+      // console.log(xhr.responseText);
+      if (xhr.readyState == 4) {
+        let data = JSON.parse(xhr.responseText);
+        let display = document.getElementById("users_display");
+        let count = document.getElementById("num_users").innerHTML = data.length;
+        for (let i =0; i < count; i++) {
+          if (usuaris[data[i]] == undefined || usuaris[data[i]] == null) {
+            usuaris[data[i]] = true;
+            var z = document.createElement("option");
+            z.setAttribute("name", data[i]);
+            var t = document.createTextNode(data[i]);
+            z.appendChild(t);
+            display.appendChild(z);
+          }
+        }
+      }
+    }, false);
+  }
+
+  function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+  }
+
+
+  function SendTransaction() {
+    let e = document.getElementById("users_display");
+    let to = e.options[e.selectedIndex].value;
+    let from = getCookie("username_upcoin");
+    let amount = parseInt(document.getElementById("amount").value);
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', "http://localhost:5000/registre?emisor="+from+"&receptor="+to+"&amount="+amount, true);
+    xhr.send();
+
+    xhr.addEventListener("readystatechange", function() {
+      if (xhr.readyState == 4) {
+        document.getElementById("amount").value=0;
+      }
+    }, false);
+  }
+
+
+  function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    var expires = "expires="+d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+  }
+
+  window.onload = function() {
+    usuaris[getCookie("username_upcoin")] = true;
+    setInterval(actualitzaUsuaris, 2000);
+    setInterval(actualitzaCoins, 2000);
+    document.getElementById("cartera").innerHTML = "Cartera de "+ getCookie("username_upcoin");
+  }
+
+</script>
+
+<style>
+html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
+</style>
+<body class="w3-light-grey">
+
+<!-- Barra superior -->
+<div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
+  <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();"><i class="fa fa-bars"></i>  Menu</button>
+  <span id="cartera" class="w3-bar-item w3-right">Página principal de UPCoin</span>
+</div>
+
+<!-- !Contingut de la pagina! -->
+<div class="w3-main" style="margin-left:0px;margin-top:43px;">
+
+  <!-- Header -->
+  <header class="w3-container" style="padding-top:22px">
+    <h5><b> Cartera de UPCoins</b></h5>
+  </header>
+
+
+
+  <div class="w3-row-padding w3-margin-bottom">
+
+	<div class="w3-quarter" style="margin-right:150px">
+      <div class="w3-container w3-blue w3-text-white w3-padding-16">
+	  <h4 style="margin-top: 0px">Transaccions</h4>
+		<div class="w3-left">
+
+		  <h8>Destinatari: </h8>
+			<select id="users_display" style="width: 200px"> </select>
+		  <br><br>
+		  <h8>Quantitat: </h8>
+		  <input type="text" id="amount" name="quantitat"  style="width: 60px" > UPCoins
+        </div>
+
+		<div class="w3-right">
+			<br><br>
+			<input id="transact"onclick="SendTransaction()" type="submit" value="Enviar">
+		</div>
+
+        <div class="w3-clear"></div>
+
+      </div>
+    </div>
+
+    <div class="w3-quarter">
+      <div class="w3-container w3-red w3-padding-16">
+        <div class="w3-left">
+			<img src="https://lh6.googleusercontent.com/uIowbfk7gv_K9z7XCfdZ8aVNnCEsV9wxLAS9G-7eZxYW86W4eWdP_8_dtJ8ZEQ5DeS07VBMwybokFL4XsNl0=w1920-h938" style="width:50px;height:50px;">
+		</div>
+        <div class="w3-right">
+          <h3 id="mycoins">0</h3>
+        </div>
+        <div class="w3-clear"></div>
+        <h4>UPCoins</h4>
+      </div>
+    </div>
+
+    <div class="w3-quarter">
+      <div class="w3-container w3-orange w3-text-white w3-padding-16">
+        <div class="w3-left"><i class="fa fa-users w3-xxxlarge"></i></div>
+        <div class="w3-right">
+          <h3 id="num_users">1</h3>
+        </div>
+        <div class="w3-clear"></div>
+        <h4>Usuaris al blockchain</h4>
+      </div>
+    </div>
+
+
+
+  </div>
+
+ <br><br><br><br><br><br><br><br><br><br><br>
+
+  <div style="position: absolute; bottom: 0; align:center; width: 100%;" class="w3-container w3-dark-grey w3-padding-32">
+	<p style="text-align:center">LES MATEMÀTIQUES DE LES CRIPTOMONEDES</p>
+	<p style="text-align:center">Universitat Politècnica de Catalunya </p>
+  </div>
+
+
+  <!-- Peu de pagina -->
+</div>
+
+</body>
+</html>

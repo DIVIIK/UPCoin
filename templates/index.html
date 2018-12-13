@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>UPCoin</title>
+    <script type="text/javascript">
+
+      function setCookie(cname, cvalue, exdays) {
+        var d = new Date();
+        d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+        var expires = "expires="+d.toUTCString();
+        document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+      }
+
+      function loginButton() {
+        let text = document.getElementById("username").value;
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', "http://localhost:5000/login?name="+text, true);
+        xhr.send();
+
+        xhr.addEventListener("readystatechange", valorRebut, false);
+
+        function valorRebut(e) {
+          if (xhr.readyState == 4) {
+            let data = JSON.parse(xhr.responseText);
+            if (data.length > 0) {
+              setCookie("username_upcoin", text, 365)
+              window.location.href = "http://localhost:5000/document";
+            }
+          }
+        }
+      }
+
+    </script>
+    <style media="screen">
+
+    </style>
+  </head>
+  <body>
+    <input type="text" name="name" placeholder="User Name" id="username">
+    <input type="button" name="send" value="Login" onclick="loginButton()">
+  </body>
+</html>
